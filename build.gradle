@@ -1,0 +1,33 @@
+buildscript {
+    ext {
+        springBootVersion = '2.5.2'
+    }
+    repositories {
+        mavenCentral()
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'idea'
+
+group 'org.example.evresponseserver'
+version '1.0-SNAPSHOT'
+
+repositories {
+    maven { url 'https://repo.spring.io/release' }
+    maven { url 'https://repo.spring.io/milestone' }
+    maven { url 'https://repo.spring.io/snapshot' }
+    mavenCentral()
+}
+
+dependencies {
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter', version: '2.4.0'
+    compile group: 'io.netty', name: 'netty-all', version: '4.1.24.Final'
+
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+
+    compileOnly 'org.projectlombok:lombok:1.18.12'
+    annotationProcessor 'org.projectlombok:lombok:1.18.12'
+    testCompileOnly 'org.projectlombok:lombok:1.18.12'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.12'
+}
