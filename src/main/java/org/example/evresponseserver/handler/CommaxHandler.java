@@ -12,13 +12,9 @@ import org.springframework.stereotype.Component;
 @Component
 @ChannelHandler.Sharable
 @RequiredArgsConstructor
-public class HyundaiHandler extends ChannelInboundHandlerAdapter {
-    private int DATA_LENGTH = 62;
+public class CommaxHandler extends ChannelInboundHandlerAdapter {
+    private int DATA_LENGTH = 17;
     private ByteBuf buff;
-
-    // 1 2 3 4 5 6 7 8 9
-//    private int[] initStatus = {25, 25, 25, 20, 20, 20, 20, 30, 5, 20, 25, 25, 25, 20, 20, 20, 20, 30, 30, 35, 25, 25, 25, 20, 20, 20, 20, 30, 30, 35};
-//    private int[] currentStatus = {25, 25, 25, 20, 20, 20, 20, 30, 5, 20, 25, 25, 25, 20, 20, 20, 20, 30, 30, 35, 25, 25, 25, 20, 20, 20, 20, 30, 30, 35};
 
     private int[] initStatus = {39, 39, 39, 39, 39, 39, 39, 39, 39};
     private int[] currentStatus = {10, 12, 20, 20, 20, 20, 30, 25, 15};
@@ -43,6 +39,13 @@ public class HyundaiHandler extends ChannelInboundHandlerAdapter {
     }
 
 
+    /**
+     * sample data hall call req = a5000f03000a000000060000010000015a
+     * sample data hall call res = a5000f04000a00030006 01 0002 00 00 01 5a
+     * @param ctx
+     * @param msg
+     */
+
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         log.info("channelRead {}", msg);
@@ -50,22 +53,35 @@ public class HyundaiHandler extends ChannelInboundHandlerAdapter {
         ByteBuf mBuf = (ByteBuf) msg;
         String res = "";
         ByteBuf response;// = Unpooled.buffer(msgBytes.length);
-        if (mBuf.readableBytes() < 9) {
-            res = makeStatusResponse();
-            response = Unpooled.buffer(res.length());
-            response.writeBytes(res.getBytes());
-        } else {
-//            res = "STX01010101042200000000000000000000000000000000000000000000000000ETX";
-            res = "STX01010201042200000000000000000000000000000000000000000000000000ETX";
 
-//STX 0103 06 01      04   2   2     00    0000000000000000 0000000000000000 0000000000000000 ETX
-//     동 호기 운행정보 층수 방향 도어 정지예정층 카호출             상향호출            하향호출
-            byte[] msgBytes = res.getBytes();
-            buff.writeBytes(msgBytes);  // 클라이언트에서 보내는 데이터가 축적됨
-            mBuf.release();
-            response = Unpooled.buffer(msgBytes.length);
-//        response.writeBytes((byte[]) msg);
-            buff.getBytes(0, response, msgBytes.length);
+        byte reqType = mBuf.getByte(3);
+
+
+        if(reqType == 0x03 || reqType == 0x0d) {
+            byte[] callRes = {(byte) 0xA5, 0x00, (byte) 0x0F, 0x04, 0x00, 0x0A,
+                    0x00, 0x66, // 동
+                    0x00, 0x00, // ev 호기
+                    0x00,   // 운행정보
+                    0x00, 0x00,  // 층 정보
+                    0x00,   //운행 방향
+                    0x00,   //도어 상태
+                    0x00,   // 호출 방향
+                    0x5A};
+            log.info("{}", ByteArrayManager.toString(callRes));
+            response = Unpooled.buffer(17);
+            response.writeBytes(callRes);
+        } else {
+            byte[] statusRes = {(byte) 0xA5, 0x00, (byte) 0x23, 0x02,
+                    0x00, 0x1E,
+                    0x00, 0x0a, 0x00, 0x01, 0x01, 0x00, 0x02, 0x00, 0x01, 0x00,
+                    0x00, 0x0a, 0x00, 0x02, 0x01, 0x00, 0x03, 0x01, 0x00, 0x01,
+                    0x00, 0x0a, 0x00, 0x03, 0x02, 0x00, 0x10, 0x02, 0x00, 0x03,
+                    0x5A
+            };
+
+            log.info("{}", ByteArrayManager.toString(statusRes));
+            response = Unpooled.buffer(37);
+            response.writeBytes(statusRes);
         }
 
 //        final ChannelFuture f = ctx.writeAndFlush(response);
@@ -97,7 +113,7 @@ public class HyundaiHandler extends ChannelInboundHandlerAdapter {
             String evId = (i < 9) ? ("0" + (i + 1)) : ("" + (i + 1));
 
             if (evId.equals("02")) {
-                    res += "0205" + evId + "07" + floor + "2000000000000000000000000000000000000000000000000000";
+                res += "0205" + evId + "07" + floor + "2000000000000000000000000000000000000000000000000000";
             } else {
                 if (currentStatus[i] == 6) {
                     res += "0205" + evId + "01" + floor + "2000000000000000000000000000000000000000000000000000";

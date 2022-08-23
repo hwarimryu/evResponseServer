@@ -1,4 +1,4 @@
-package org.example.evresponseserver.Message.hyundai;
+package org.example.evresponseserver.message.hyundai;
 
 /**
  * 현대EV 연동 시 EV 호출에 사용하는 MSG

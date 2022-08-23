@@ -1,4 +1,4 @@
-package org.example.evresponseserver.Message.sungbin;
+package org.example.evresponseserver.message.sungbin;
 
 
 import io.netty.buffer.ByteBuf;

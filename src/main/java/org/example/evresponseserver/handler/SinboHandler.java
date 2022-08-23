@@ -1,18 +1,22 @@
 package org.example.evresponseserver.handler;
+
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+
 @Slf4j
 @Component
 @ChannelHandler.Sharable
 @RequiredArgsConstructor
-public class HyundaiHandlerX extends SimpleChannelInboundHandler<String> {
+public class SinboHandler extends ChannelInboundHandlerAdapter {
     private int DATA_LENGTH = 62;
     private ByteBuf buff;
-
     // 핸들러가 생성될 때 호출되는 메소드
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) {
@@ -33,18 +37,27 @@ public class HyundaiHandlerX extends SimpleChannelInboundHandler<String> {
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, String msg) throws Exception {
-        log.info("Elevator call : {}", msg);
-        final ChannelFuture f = ctx.writeAndFlush(msg);
+    public void channelRead(ChannelHandlerContext ctx, Object msg) {
+        log.info("channelRead {}", msg);
 
+        String resOk = "&Resul=ok";
+        String resFail = "&Result=fail&ErrMsg=고장";
 
+        String res = msg + resOk;
+        String length = String.format("%8s", res.length()).replace(" ", "0");
+        res = length + res;
+        log.info("res {}", res);
+        ByteBuf response;
+        response = Unpooled.buffer(res.getBytes(StandardCharsets.UTF_8).length);
+        response.writeBytes(res.getBytes(StandardCharsets.UTF_8));
+
+        final ChannelFuture f = ctx.writeAndFlush(response);
+        f.addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        // Close the connection when an exception is raised.
         ctx.close();
         cause.printStackTrace();
     }
-
 }

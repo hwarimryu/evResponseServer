@@ -1,10 +1,8 @@
-package org.example.evresponseserver.Message.hyundai;
+package org.example.evresponseserver.message.hyundai;
 
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 성빈EV 감시반으로 부터 수신한 호기의 상태 정보

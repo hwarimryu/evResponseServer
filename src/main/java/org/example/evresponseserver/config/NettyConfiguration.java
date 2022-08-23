@@ -1,4 +1,5 @@
 package org.example.evresponseserver.config;
+
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -15,25 +16,23 @@ import java.net.InetSocketAddress;
 @Configuration
 @RequiredArgsConstructor
 public class NettyConfiguration {
-
-//    @Value("${server.host}")
+    private EvCrt crt = EvCrt.OTIS;
     private String host = "172.16.28.1";
-//    @Value("${server.port}")
-    private int port = 4230;
-//    @Value("${server.netty.boss-count}")
-    private int bossCount = 1;
-//    @Value("${server.netty.worker-count}")
-    private int workerCount = 1;
-//    @Value("${server.netty.keep-alive}")
-    private boolean keepAlive = true;
-//    @Value("${server.netty.backlog}")
-    private int backlog = 1000;
+    private int port = 2999;
+//    private int port = 29516;
+//    private int port = 29510;
+//    private int port = 7120;
+//    private int port = 2999;
+//    private int port = 3000;
 
-    private EvCrt crt = EvCrt.SUNGBIN;
+    private int bossCount = 1;
+    private int workerCount = 1;
+    private int backlog = 1000;
 
     @Bean
     public ServerBootstrap serverBootstrap(NettyChannelInitializer nettyChannelInitializer) {
         // ServerBootstrap: 서버 설정을 도와주는 class
+        nettyChannelInitializer.setCrt(crt);
         ServerBootstrap b = new ServerBootstrap();
         b.group(bossGroup(), workerGroup())
                 // NioServerSocketChannel: incoming connections를 수락하기 위해 새로운 Channel을 객체화할 때 사용

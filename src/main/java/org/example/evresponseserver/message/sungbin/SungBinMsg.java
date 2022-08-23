@@ -1,4 +1,4 @@
-package org.example.evresponseserver.Message.sungbin;
+package org.example.evresponseserver.message.sungbin;
 
 /**
  * 성빈EV 감시반과 주고 받는데 사용되는 MSG 포멧

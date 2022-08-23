@@ -1,4 +1,4 @@
-package org.example.evresponseserver.Message.hyundai;
+package org.example.evresponseserver.message.hyundai;
 
 import java.util.List;
 
